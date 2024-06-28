@@ -24,6 +24,7 @@ btn_right = QPushButton("Вправо")
 btn_flip = QPushButton("Відзеркалити")
 btn_sharp = QPushButton("Різкість")
 btn_bw = QPushButton("Ч/Б")
+btn_res = QPushButton("Скинути") # Нова кнопка, щоб скинути стан картинки
 
 row = QHBoxLayout()  # Головна лінія
 col1 = QVBoxLayout()  # ділиться на два стовпці
@@ -37,6 +38,7 @@ row_tools.addWidget(btn_right)
 row_tools.addWidget(btn_flip)
 row_tools.addWidget(btn_sharp)
 row_tools.addWidget(btn_bw)
+row_tools.addWidget(btn_res) # додавання ресет кнопки в рядок кнопок
 col2.addLayout(row_tools)
 
 row.addLayout(col1, 20)
@@ -81,12 +83,14 @@ class ImageProcessor():
         self.dir = None
         self.filename = None
         self.save_dir = "Modified/"
+        self.original_img = None # початкове зображення для сскидання стану
 
     def loadImage(self, filename):
         ''' під час завантаження запам'ятовуємо шлях та ім'я файлу '''
         self.filename = filename
         fullname = os.path.join(workdir, filename)
         self.image = Image.open(fullname)
+        self.original_img = self.image.copy() # зберігаємо орігінальну картинку(її копію)
 
     def saveImage(self):
         ''' зберігає копію файлу у підпапці '''
@@ -135,6 +139,12 @@ class ImageProcessor():
         lb_image.setPixmap(pixmapimage)
         lb_image.show()
 
+    def resetImage(self):
+        if self.original_img:
+            self.image = self.original_img.copy()
+            self.saveImage()
+            image_path = os.path.join(workdir, self.save_dir, self.filename)
+            self.showImage(image_path)
 
 def showChosenImage():
     if lw_files.currentRow() >= 0:
@@ -151,5 +161,6 @@ btn_left.clicked.connect(workimage.do_left)
 btn_right.clicked.connect(workimage.do_right)
 btn_sharp.clicked.connect(workimage.do_sharpen)
 btn_flip.clicked.connect(workimage.do_flip)
+btn_res.clicked.connect(workimage.resetImage)
 
 app.exec()
